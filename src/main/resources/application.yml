@@ -1,0 +1,37 @@
+spring:
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: deferred
+#  datasource:
+#    url: jdbc:postgresql://localhost:5431/testing
+#    username: zourkas
+#    password: rooting
+#    driver-class-name: org.postgresql.Driver
+#    hikari:
+#      jdbc-url: jdbc:postgresql://localhost:5431/testing
+#      leak-detection-threshold: 24000
+#      maximum-pool-size: 20
+#      minimum-idle: 5
+  secondary-datasource:
+    url: jdbc:postgresql://localhost:5430/testing2
+    username: zourkas2
+    password: rooting2
+    initialization-mode: always
+    hikari:
+      jdbc-url: jdbc:postgresql://localhost:5430/testing2
+      leak-detection-threshold: 24000
+      maximum-pool-size: 20
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc.lob.non_contextual_creation: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+
+  datasource:
+    initialization-modelways

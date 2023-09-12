@@ -1,0 +1,21 @@
+version: '1'
+services:
+  postgres-common-primary:
+    restart: always
+    image: postgres:10
+    environment:
+      - POSTGRES_PASSWORD=rooting
+      - POSTGRES_DB=testing
+      - POSTGRES_USER=zourkas
+    ports:
+      - 5431:5432
+
+  postgres-common-secondary:
+    restart: always
+    image: postgres:10
+    environment:
+      - POSTGRES_PASSWORD=rooting2
+      - POSTGRES_DB=testing2
+      - POSTGRES_USER=zourkas2
+    ports:
+      - 5430:5432
