@@ -6,11 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class Testing {
+public class TestSecondDatabase {
 
     public final PersonService personService;
+
     @Autowired
-    public Testing(PersonService personService) {
+    public TestSecondDatabase(PersonService personService) {
         this.personService = personService;
     }
 
