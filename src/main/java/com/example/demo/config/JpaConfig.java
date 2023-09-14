@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -18,44 +20,46 @@ import javax.sql.DataSource;
 import java.util.Objects;
 import java.util.Properties;
 
-@EnableConfigurationProperties(DataSourceProperties.class)
 @Configuration
+@ComponentScan("com.example.demo.service")
+@EnableConfigurationProperties(DataSourceProperties.class)
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.example.demo.repository", // Replace with your secondary repository package
-        entityManagerFactoryRef = "secondaryEntityManagerFactory",
-        transactionManagerRef = "secondaryTransactionManager"
+        basePackages = "com.example.demo",
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.REGEX,
+                pattern = "com.example.demo.db2.*"
+        )
 )
-public class SecondaryDataSourceConfig {
-    @Value("${spring.secondary-datasource.url}")
+public class JpaConfig {
+    @Value("${spring.datasource.url}")
     private String url;
-    @Value("${spring.secondary-datasource.username}")
+    @Value("${spring.datasource.username}")
     private String username;
-    @Value("${spring.secondary-datasource.password}")
+    @Value("${spring.datasource.password}")
     private String password;
 
-    @Bean(name = "secondaryDataSourceProperties")
-    public DataSourceProperties secondaryDataSourceProperties() {
+    @Bean(name = "dataSourceProperties")
+    public DataSourceProperties dataSourceProperties() {
         DataSourceProperties pr = new DataSourceProperties();
         pr.setUrl(url);
         pr.setUsername(username);
         pr.setPassword(password);
         return pr;
     }
-    @Value("${spring.secondary-datasource.hikari.jdbc-url}")
+    @Value("${spring.datasource.hikari.jdbc-url}")
     private String jdbcUrl;
-    @Value("${spring.secondary-datasource.hikari.leak-detection-threshold}")
+    @Value("${spring.datasource.hikari.leak-detection-threshold}")
     private int leakDetectionThreshold;
-    @Value("${spring.secondary-datasource.hikari.maximum-pool-size}")
+    @Value("${spring.datasource.hikari.maximum-pool-size}")
     private int maximumPoolSize;
-    @Value("${spring.secondary-datasource.hikari.minimum-idle}")
+    @Value("${spring.datasource.hikari.minimum-idle}")
     private int minimumIdle;
-
-    @Value("${spring.jpa.hibernate.ddl-auto}")
+    @Value("${custom.jpa.hibernate.ddl-auto}")
     private String ddl;
 
-    @Bean(name = "secondaryDataSource")
-    public DataSource secondaryDataSource(@Qualifier("secondaryDataSourceProperties") DataSourceProperties dataSourceProperties) {
+    @Bean(name = "dataSource")
+    public DataSource datasource(@Qualifier("dataSourceProperties") DataSourceProperties dataSourceProperties) {
         HikariDataSource hikariDatasource = dataSourceProperties
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
@@ -65,17 +69,19 @@ public class SecondaryDataSourceConfig {
         hikariDatasource.setLeakDetectionThreshold(leakDetectionThreshold);
         hikariDatasource.setMaximumPoolSize(maximumPoolSize);
         hikariDatasource.setMinimumIdle(minimumIdle);
+        hikariDatasource.setUsername(username);
+        hikariDatasource.setPassword(password);
 
         return hikariDatasource;
     }
 
-    @Bean(name = "secondaryEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(
-            @Qualifier("secondaryDataSource") DataSource secondaryDataSource) {
+    @Bean(name = "entityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+            @Qualifier("dataSource") DataSource datasource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(secondaryDataSource);
-        em.setPackagesToScan("com.example.demo.domain"); // Replace with your secondary entity package
-        em.setPersistenceUnitName("secondary");
+        em.setDataSource(datasource);
+        em.setPackagesToScan("com.example.demo.domain");
+        em.setPersistenceUnitName("default");
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
@@ -87,9 +93,9 @@ public class SecondaryDataSourceConfig {
         return em;
     }
 
-    @Bean(name = "secondaryTransactionManager")
-    public PlatformTransactionManager secondaryTransactionManager(
-            @Qualifier("secondaryEntityManagerFactory") LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
-        return new JpaTransactionManager(Objects.requireNonNull(secondaryEntityManagerFactory.getObject()));
+    @Bean(name = "transactionManager")
+    public PlatformTransactionManager transactionManager(
+            @Qualifier("entityManagerFactory") LocalContainerEntityManagerFactoryBean entityManagerFactory) {
+        return new JpaTransactionManager(Objects.requireNonNull(entityManagerFactory.getObject()));
     }
 }

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "people")
-public class Person {
+public class SecondaryPerson {
     @Column(name = "last_name", length = 20)
     private String lastName;
     @Column(name = "first_name", length = 20)
@@ -15,10 +15,10 @@ public class Person {
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
-    public Person() {
+    public SecondaryPerson() {
     }
 
-    public Person(String firstName, String lastName) {
+    public SecondaryPerson(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
     }

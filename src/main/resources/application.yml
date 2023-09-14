@@ -1,25 +1,15 @@
 spring:
-  data:
-    jpa:
-      repositories:
-        bootstrap-mode: deferred
-#  datasource:
-#    url: jdbc:postgresql://localhost:5431/testing
-#    username: zourkas
-#    password: rooting
-#    driver-class-name: org.postgresql.Driver
-#    hikari:
-#      jdbc-url: jdbc:postgresql://localhost:5431/testing
-#      leak-detection-threshold: 24000
-#      maximum-pool-size: 20
-#      minimum-idle: 5
-  secondary-datasource:
-    url: jdbc:postgresql://localhost:5430/testing2
-    username: zourkas2
-    password: rooting2
-    initialization-mode: always
+#  data:
+#    jpa:
+#      repositories:
+#        bootstrap-mode: deferred
+  datasource:
+    url: jdbc:postgresql://localhost:5431/testing
+    username: zourkas
+    password: rooting
+    driver-class-name: org.postgresql.Driver
     hikari:
-      jdbc-url: jdbc:postgresql://localhost:5430/testing2
+      jdbc-url: jdbc:postgresql://localhost:5431/testing
       leak-detection-threshold: 24000
       maximum-pool-size: 20
       minimum-idle: 5
@@ -30,8 +20,27 @@ spring:
       hibernate:
         jdbc.lob.non_contextual_creation: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  profiles:
+    active: dev
 
+custom:
+  secondary-datasource:
+    url: jdbc:postgresql://localhost:5430/testing2
+    username: zourkas2
+    password: rooting2
+    hikari:
+      jdbc-url: jdbc:postgresql://localhost:5430/testing2
+      leak-detection-threshold: 5000
+      maximum-pool-size: 20
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: update
 
-
-  datasource:
-    initialization-modelways
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    com.zaxxer.hikari: DEBUG
+#    org.springframework.boot: DEBUG
+#    org.hibernate: DEBUG
