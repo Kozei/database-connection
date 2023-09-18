@@ -1,4 +1,4 @@
-package com.example.demo.db2.service;
+package com.example.demo.db2.service.impl;
 
 import com.example.demo.db2.domain.SecondaryPerson;
 import com.example.demo.db2.repository.SecondaryPersonRepository;
@@ -12,7 +12,8 @@ public class SecondaryPersonService {
     public SecondaryPersonService(SecondaryPersonRepository secondaryPersonRepository) {
         this.secondaryPersonRepository = secondaryPersonRepository;
     }
-    public void savePerson(){
+    public void
+    savePerson(){
         SecondaryPerson secondaryPerson = new SecondaryPerson();
         secondaryPerson.setFirstName("george-secondDd");
         secondaryPerson.setLastName("leonidis");

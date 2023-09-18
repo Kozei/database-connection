@@ -1,6 +1,6 @@
 package com.example.demo.integration;
 
-import com.example.demo.db2.service.SecondaryPersonService;
+import com.example.demo.db2.service.impl.SecondaryPersonService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

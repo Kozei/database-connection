@@ -2,6 +2,8 @@ package com.example.demo.domain;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "people")
 public class Person {
@@ -10,17 +12,22 @@ public class Person {
     @Column(name = "first_name", length = 20)
     private String firstName;
 
+    @Column(nullable = false)
+    private Instant timestamp;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Use IDENTITY for auto-incrementing columns
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
     public Person() {
+        this.timestamp = Instant.now();
     }
 
     public Person(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.timestamp = Instant.now();
     }
 
     public void setFirstName(String firstName) {
@@ -50,5 +57,13 @@ public class Person {
 
     public Long getId() {
         return id;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 }
