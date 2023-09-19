@@ -1,16 +1,13 @@
 package com.example.demo.db2.config;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.*;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -37,11 +34,11 @@ public class SecondaryDataSourceConfig {
     private String username;
     private String password;
     @NestedConfigurationProperty
-    private final CustomHikariProperties customHikariProperties;
+    private final CustomHikariConfig customHikariConfig;
     private final CustomJpaProperties customJpaProperties;
 
-    public SecondaryDataSourceConfig(CustomHikariProperties customHikariProperties, CustomJpaProperties customJpaProperties) {
-        this.customHikariProperties = customHikariProperties;
+    public SecondaryDataSourceConfig(CustomHikariConfig customHikariConfig, CustomJpaProperties customJpaProperties) {
+        this.customHikariConfig = customHikariConfig;
         this.customJpaProperties = customJpaProperties;
     }
 
@@ -53,19 +50,17 @@ public class SecondaryDataSourceConfig {
 
     @Bean(name = "secondaryDataSource")
     public DataSource secondaryDataSource(@Qualifier("secondaryDataSourceProperties") DataSourceProperties dataSourceProperties) {
-        HikariDataSource hikariDatasource = dataSourceProperties
-                .initializeDataSourceBuilder()
-                .type(HikariDataSource.class)
-                .build();
+        HikariConfig hikariConfig = new HikariConfig();
 
-        hikariDatasource.setJdbcUrl(customHikariProperties.getJdbcUrl());
-        hikariDatasource.setLeakDetectionThreshold(customHikariProperties.getLeakDetectionThreshold());
-        hikariDatasource.setMaximumPoolSize(customHikariProperties.getMaximumPoolSize());
-        hikariDatasource.setMinimumIdle(customHikariProperties.getMinimumIdle());
-        hikariDatasource.setUsername(secondaryDataSourceProperties().getUsername());
-        hikariDatasource.setPassword(secondaryDataSourceProperties().getPassword());
+        hikariConfig.setUsername(dataSourceProperties.getUsername());
+        hikariConfig.setPassword(dataSourceProperties.getPassword());
 
-        return hikariDatasource;
+        hikariConfig.setJdbcUrl(customHikariConfig.getJdbcUrl());
+        hikariConfig.setLeakDetectionThreshold(customHikariConfig.getLeakDetectionThreshold());
+        hikariConfig.setMinimumIdle(customHikariConfig.getMinimumIdle());
+        hikariConfig.setMaximumPoolSize(customHikariConfig.getMaximumPoolSize());
+
+        return new HikariDataSource(hikariConfig);
     }
 
     @Bean(name = "secondaryEntityManagerFactory")
