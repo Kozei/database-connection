@@ -31,7 +31,7 @@ import java.util.Properties;
         entityManagerFactoryRef = "secondaryEntityManagerFactory",
         transactionManagerRef = "secondaryTransactionManager"
 )
-@ConfigurationProperties(prefix = "custom.secondary-datasource")
+//@ConfigurationProperties(prefix = "custom.secondary-datasource")
 public class SecondaryDataSourceConfig {
     private String url;
     private String username;
@@ -46,12 +46,9 @@ public class SecondaryDataSourceConfig {
     }
 
     @Bean(name = "secondaryDataSourceProperties")
+    @ConfigurationProperties(prefix = "custom.secondary-datasource")
     public DataSourceProperties secondaryDataSourceProperties() {
-        DataSourceProperties properties = new DataSourceProperties();
-        properties.setUrl(url);
-        properties.setUsername(username);
-        properties.setPassword(password);
-        return properties;
+        return new DataSourceProperties();
     }
 
     @Bean(name = "secondaryDataSource")
@@ -65,8 +62,8 @@ public class SecondaryDataSourceConfig {
         hikariDatasource.setLeakDetectionThreshold(customHikariProperties.getLeakDetectionThreshold());
         hikariDatasource.setMaximumPoolSize(customHikariProperties.getMaximumPoolSize());
         hikariDatasource.setMinimumIdle(customHikariProperties.getMinimumIdle());
-        hikariDatasource.setUsername(username);
-        hikariDatasource.setPassword(password);
+        hikariDatasource.setUsername(secondaryDataSourceProperties().getUsername());
+        hikariDatasource.setPassword(secondaryDataSourceProperties().getPassword());
 
         return hikariDatasource;
     }
