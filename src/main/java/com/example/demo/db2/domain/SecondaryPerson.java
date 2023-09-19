@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "people")
+//@Access(AccessType.PROPERTY)
 public class SecondaryPerson {
     @Column(name = "last_name", length = 20)
     private String lastName;
@@ -67,4 +68,6 @@ public class SecondaryPerson {
     public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
     }
+
+
 }

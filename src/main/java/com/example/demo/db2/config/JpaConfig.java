@@ -1,4 +1,4 @@
-package com.example.demo.config;
+package com.example.demo.db2.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,7 +55,7 @@ public class JpaConfig {
     private int maximumPoolSize;
     @Value("${spring.datasource.hikari.minimum-idle}")
     private int minimumIdle;
-    @Value("${custom.jpa.hibernate.ddl-auto}")
+    @Value("${custom.jpa.properties.hibernate.ddl}")
     private String ddl;
 
     @Bean(name = "dataSource")

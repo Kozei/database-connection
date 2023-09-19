@@ -1,11 +1,16 @@
 package com.example.demo.db2.config;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.*;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -26,32 +31,28 @@ import java.util.Properties;
         entityManagerFactoryRef = "secondaryEntityManagerFactory",
         transactionManagerRef = "secondaryTransactionManager"
 )
+@ConfigurationProperties(prefix = "custom.secondary-datasource")
 public class SecondaryDataSourceConfig {
-    @Value("${custom.secondary-datasource.url}")
     private String url;
-    @Value("${custom.secondary-datasource.username}")
     private String username;
-    @Value("${custom.secondary-datasource.password}")
     private String password;
+    @NestedConfigurationProperty
+    private final CustomHikariProperties customHikariProperties;
+    private final CustomJpaProperties customJpaProperties;
+
+    public SecondaryDataSourceConfig(CustomHikariProperties customHikariProperties, CustomJpaProperties customJpaProperties) {
+        this.customHikariProperties = customHikariProperties;
+        this.customJpaProperties = customJpaProperties;
+    }
 
     @Bean(name = "secondaryDataSourceProperties")
     public DataSourceProperties secondaryDataSourceProperties() {
-        DataSourceProperties pr = new DataSourceProperties();
-        pr.setUrl(url);
-        pr.setUsername(username);
-        pr.setPassword(password);
-        return pr;
+        DataSourceProperties properties = new DataSourceProperties();
+        properties.setUrl(url);
+        properties.setUsername(username);
+        properties.setPassword(password);
+        return properties;
     }
-    @Value("${custom.secondary-datasource.hikari.jdbc-url}")
-    private String jdbcUrl;
-    @Value("${custom.secondary-datasource.hikari.leak-detection-threshold}")
-    private int leakDetectionThreshold;
-    @Value("${custom.secondary-datasource.hikari.maximum-pool-size}")
-    private int maximumPoolSize;
-    @Value("${custom.secondary-datasource.hikari.minimum-idle}")
-    private int minimumIdle;
-    @Value("${custom.jpa.hibernate.ddl-auto}")
-    private String ddl;
 
     @Bean(name = "secondaryDataSource")
     public DataSource secondaryDataSource(@Qualifier("secondaryDataSourceProperties") DataSourceProperties dataSourceProperties) {
@@ -60,10 +61,10 @@ public class SecondaryDataSourceConfig {
                 .type(HikariDataSource.class)
                 .build();
 
-        hikariDatasource.setJdbcUrl(jdbcUrl);
-        hikariDatasource.setLeakDetectionThreshold(leakDetectionThreshold);
-        hikariDatasource.setMaximumPoolSize(maximumPoolSize);
-        hikariDatasource.setMinimumIdle(minimumIdle);
+        hikariDatasource.setJdbcUrl(customHikariProperties.getJdbcUrl());
+        hikariDatasource.setLeakDetectionThreshold(customHikariProperties.getLeakDetectionThreshold());
+        hikariDatasource.setMaximumPoolSize(customHikariProperties.getMaximumPoolSize());
+        hikariDatasource.setMinimumIdle(customHikariProperties.getMinimumIdle());
         hikariDatasource.setUsername(username);
         hikariDatasource.setPassword(password);
 
@@ -83,7 +84,7 @@ public class SecondaryDataSourceConfig {
 
         Properties properties = new Properties();
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        properties.setProperty("hibernate.hbm2ddl.auto", ddl);
+        properties.setProperty("hibernate.hbm2ddl.auto", customJpaProperties.getDdl());
         em.setJpaProperties(properties);
         return em;
     }
@@ -93,4 +94,29 @@ public class SecondaryDataSourceConfig {
             @Qualifier("secondaryEntityManagerFactory") LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
         return new JpaTransactionManager(Objects.requireNonNull(secondaryEntityManagerFactory.getObject()));
     }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 }

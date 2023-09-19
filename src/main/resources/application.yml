@@ -20,8 +20,8 @@ spring:
       hibernate:
         jdbc.lob.non_contextual_creation: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-  profiles:
-    active: dev
+#  profiles:
+#    active: dev
 
 custom:
   secondary-datasource:
@@ -34,8 +34,17 @@ custom:
       maximum-pool-size: 20
       minimum-idle: 5
   jpa:
-    hibernate:
-      ddl-auto: update
+    properties:
+      hibernate:
+        ddl: update
+
+logging:
+  level:
+    org:
+      springframework:
+        boot:
+          autoconfigure:
+            EnableAutoConfiguration: DEBUG
 
 #logging:
 #  level:

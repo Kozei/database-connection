@@ -6,6 +6,7 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "people")
+//@Access(AccessType.PROPERTY)
 public class Person {
     @Column(name = "last_name", length = 20)
     private String lastName;
@@ -66,4 +67,6 @@ public class Person {
     public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
     }
+
+
 }
