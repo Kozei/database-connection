@@ -22,17 +22,13 @@ import java.util.Properties;
 @EnableConfigurationProperties(DataSourceProperties.class)
 @Configuration
 @EnableTransactionManagement
-@ComponentScan("com.example.demo.service")
+@ComponentScan("com.example.demo.db2.service")
 @EnableJpaRepositories(
         basePackages = "com.example.demo.db2",
         entityManagerFactoryRef = "secondaryEntityManagerFactory",
         transactionManagerRef = "secondaryTransactionManager"
 )
-//@ConfigurationProperties(prefix = "custom.secondary-datasource")
 public class SecondaryDataSourceConfig {
-    private String url;
-    private String username;
-    private String password;
     @NestedConfigurationProperty
     private final CustomHikariConfig customHikariConfig;
     private final CustomJpaProperties customJpaProperties;
@@ -64,8 +60,7 @@ public class SecondaryDataSourceConfig {
     }
 
     @Bean(name = "secondaryEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(
-            @Qualifier("secondaryDataSource") DataSource secondaryDataSource) {
+    public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(@Qualifier("secondaryDataSource") DataSource secondaryDataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(secondaryDataSource);
         em.setPackagesToScan("com.example.demo.db2.domain");
@@ -75,40 +70,16 @@ public class SecondaryDataSourceConfig {
         em.setJpaVendorAdapter(vendorAdapter);
 
         Properties properties = new Properties();
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+        properties.setProperty("hibernate.dialect", customJpaProperties.getDialect());
         properties.setProperty("hibernate.hbm2ddl.auto", customJpaProperties.getDdl());
         em.setJpaProperties(properties);
+
         return em;
     }
 
     @Bean(name = "secondaryTransactionManager")
-    public PlatformTransactionManager secondaryTransactionManager(
-            @Qualifier("secondaryEntityManagerFactory") LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
+    public PlatformTransactionManager secondaryTransactionManager(@Qualifier("secondaryEntityManagerFactory")
+                                                                      LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory) {
         return new JpaTransactionManager(Objects.requireNonNull(secondaryEntityManagerFactory.getObject()));
     }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
 }

@@ -37,6 +37,7 @@ custom:
     properties:
       hibernate:
         ddl: update
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 logging:
   level:

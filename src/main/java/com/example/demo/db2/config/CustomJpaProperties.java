@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class CustomJpaProperties {
 
     private String ddl;
+    private String dialect;
 
     public String getDdl() {
         return ddl;
@@ -15,5 +16,13 @@ public class CustomJpaProperties {
 
     public void setDdl(String ddl) {
         this.ddl = ddl;
+    }
+
+    public String getDialect() {
+        return dialect;
+    }
+
+    public void setDialect(String dialect) {
+        this.dialect = dialect;
     }
 }
